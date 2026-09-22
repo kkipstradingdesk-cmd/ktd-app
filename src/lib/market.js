@@ -26,16 +26,52 @@ async function cachedFetch(url, key) {
   return data
 }
 
-// Search US equities by symbol or company name (NYSE, NASDAQ, Cboe BZX...)
+// Search US equities by symbol or company name
 export async function searchStocks(term) {
-  if (!term || term.trim().length < 1) return []
-  const url = `${TRADE_BASE}/assets?status=active&asset_class=us_equity&search=${encodeURIComponent(term)}`
-  const assets = await cachedFetch(url, 'search:' + term.toLowerCase())
-  return assets.slice(0, 12).map((a) => ({
-    symbol: a.symbol,
-    name: a.name,
-    exchange: a.exchange,
-  }))
+  if (!term || term.trim().length < 1) return [];
+  term = term.trim().toUpperCase();
+
+  // 1. First try fetching exact ticker match directly from Alpaca assets
+  try {
+    const exactUrl = `${TRADE_BASE}/assets/${term}`;
+    const exactAsset = await cachedFetch(exactUrl, 'asset:' + term);
+    if (exactAsset && exactAsset.symbol && exactAsset.tradable) {
+      return [{
+        symbol: exactAsset.symbol,
+        name: exactAsset.name,
+        exchange: exactAsset.exchange
+      }];
+    }
+  } catch (e) {
+    // Exact match failed or asset doesn't exist, proceed to broader search
+  }
+
+  // 2. Fallback: Fetch active US equities and filter by partial symbol or name match
+  try {
+    const listUrl = `${TRADE_BASE}/assets?status=active&asset_class=us_equity`;
+    // Cache this list appropriately (e.g., 24 hours) since the full asset list rarely changes intraday
+    const assets = await cachedFetch(listUrl, 'active_us_equities', 86400); 
+    
+    if (Array.isArray(assets)) {
+      const matches = assets.filter(asset => 
+        asset.tradable && (
+          asset.symbol.includes(term) || 
+          (asset.name && asset.name.toUpperCase().includes(term))
+        )
+      );
+
+      // Map and slice to limit results (e.g., top 10 matches) for performance UI rendering
+      return matches.slice(0, 10).map(asset => ({
+        symbol: asset.symbol,
+        name: asset.name,
+        exchange: asset.exchange
+      }));
+    }
+  } catch (err) {
+    console.error('Error during broader stock search fallback:', err);
+  }
+
+  return [];
 }
 
 // Latest trade prices for a list of symbols (batch)
