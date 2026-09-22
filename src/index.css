@@ -1,0 +1,121 @@
+@import "tailwindcss";
+
+:root {
+  --orange: #ff9d00;
+  --green: #00ff00;
+  --red: #ff0055;
+  --panel: #0d0d0d;
+  --border: #222;
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  padding: 0;
+  background: #000;
+  color: #d4d4d4;
+  font-family: 'Courier New', Courier, monospace;
+  -webkit-font-smoothing: antialiased;
+}
+
+#root { min-height: 100vh; }
+
+.terminal { font-family: 'Courier New', Courier, monospace; }
+
+/* ---------- Ticker bars ---------- */
+.ticker-bar {
+  overflow: hidden;
+  white-space: nowrap;
+  background: #0a0a0a;
+  border-bottom: 1px solid var(--border);
+  position: relative;
+}
+.ticker-track {
+  display: inline-block;
+  white-space: nowrap;
+  padding-left: 100%;
+  animation: ticker-scroll var(--speed, 60s) linear infinite;
+}
+.ticker-bar:hover .ticker-track { animation-play-state: paused; }
+
+@keyframes ticker-scroll {
+  0%   { transform: translateX(0); }
+  100% { transform: translateX(-100%); }
+}
+
+.stock-tick {
+  display: inline-block;
+  padding: 3px 14px;
+  font-size: 12px;
+  font-weight: bold;
+}
+.stock-tick.up   { color: var(--green); }
+.stock-tick.down { color: var(--red); }
+
+.news-item {
+  display: inline-block;
+  padding: 4px 18px;
+  font-size: 12px;
+  color: #ccc;
+}
+.news-item b { color: var(--orange); }
+
+/* ---------- Panels ---------- */
+.panel {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+}
+.panel-title {
+  color: var(--orange);
+  font-size: 11px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  padding: 8px 10px 4px;
+  border-bottom: 1px solid var(--border);
+}
+
+.pos { color: var(--green); }
+.neg { color: var(--red); }
+.amber { color: var(--orange); }
+
+/* ---------- Inputs & buttons ---------- */
+.input {
+  width: 100%;
+  background: #111;
+  border: 1px solid #333;
+  color: #eee;
+  padding: 10px 12px;
+  border-radius: 4px;
+  font-family: inherit;
+  font-size: 14px;
+}
+.input:focus { outline: none; border-color: var(--orange); }
+
+.btn {
+  width: 100%;
+  padding: 12px;
+  border: none;
+  border-radius: 4px;
+  font-family: inherit;
+  font-weight: bold;
+  font-size: 14px;
+  cursor: pointer;
+  letter-spacing: 1px;
+}
+.btn-buy  { background: var(--green); color: #000; }
+.btn-sell { background: var(--red);   color: #fff; }
+.btn-amber{ background: var(--orange); color: #000; }
+.btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+/* ---------- Scrollbars ---------- */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: #111; }
+::-webkit-scrollbar-thumb { background: #333; }
+
+/* Leaderboard row highlight for current user */
+.me-row { background: #1a1200 !important; border-left: 3px solid var(--orange); }
+
+@keyframes blink { 0%,100%{opacity:1} 50%{opacity:.3} }
+.blink { animation: blink 1.2s infinite; }
